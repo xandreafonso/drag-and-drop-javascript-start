@@ -1,36 +1,44 @@
+const allItens = document.querySelectorAll(".item");
+
+allItens.forEach(item => {
+  item.addEventListener("dragstart", event => {
+    const item = event.target;
+    item.classList.add("dragging");
+  });
+  
+  item.addEventListener("dragend", event => {
+    const item = event.target;
+    item.classList.remove("dragging");
+  });
+});
+
+
 const columns = document.querySelectorAll(".column");
 
-document.addEventListener("dragstart", (e) => {
-  e.target.classList.add("dragging");
-});
+columns.forEach(column => {
+  column.addEventListener("dragover", event => {
+    event.preventDefault();
 
-document.addEventListener("dragend", (e) => {
-  e.target.classList.remove("dragging");
-});
+    const itemDragging = document.querySelector(".dragging");
+    const elementItemAfterDragging = getElementItemAfter(column, event.clientY);
 
-columns.forEach((item) => {
-  item.addEventListener("dragover", (e) => {
-    const dragging = document.querySelector(".dragging");
-    const applyAfter = getNewPosition(item, e.clientY);
-
-    if (applyAfter) {
-      applyAfter.insertAdjacentElement("afterend", dragging);
+    if (elementItemAfterDragging) {
+      elementItemAfterDragging.insertAdjacentElement("beforebegin", itemDragging);
     } else {
-      item.prepend(dragging);
+      column.append(itemDragging);
     }
   });
 });
 
-function getNewPosition(column, posY) {
-  const cards = column.querySelectorAll(".item:not(.dragging)");
-  let result;
+function getElementItemAfter(column, mousePosY) {
+  const columnItens = column.querySelectorAll(".item:not(.dragging)");
 
-  for (let refer_card of cards) {
-    const box = refer_card.getBoundingClientRect();
-    const boxCenterY = box.y + box.height / 2;
+  for (let itemAfter of columnItens) {
+    const box = itemAfter.getBoundingClientRect();
+    const maxY = box.y + (box.height / 2);
 
-    if (posY >= boxCenterY) result = refer_card;
+    if (maxY > mousePosY) return itemAfter;
   }
 
-  return result;
+  return null;
 }
